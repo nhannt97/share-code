@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Share code</title>
+    <link rel="icon" 
+      type="image/png" 
+      href="./favicon.png">
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+      /* width */
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      /* Track */
+      ::-webkit-scrollbar-track {
+        box-shadow: inset 0 0 5px grey;
+        border-radius: 10px;
+      }
+
+      /* Handle */
+      ::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 8px;
+      }
+
+      /* Handle on hover */
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: grey;
+      }
+      html,
+      body,
+      .root,
+      .form {
+        height: 100%;
+      }
+      .root {
+        background-image: url("./background.jpg");
+        background-size: 100% 100%;
+        color: #fff;
+        font-family: "Courier New", Courier, monospace;
+        padding: 0 !important;
+      }
+      .app-name {
+        background-color: #fff;
+        text-align: center !important;
+      }
+      .text-app-name {
+        color: #4795bf;
+        font-size: 3vw;
+        font-style: italic;
+      }
+      .main {
+        height: 90%;
+        padding-top: 30px;
+      }
+      .row {
+        margin: 0 !important;
+      }
+      label {
+        white-space: nowrap;
+        padding-left: 0 !important;
+        margin-top: 10px;
+      }
+      #name,
+      #type {
+        width: 100%;
+      }
+      .btn-share,
+      .btn-share:active {
+        margin-top: 10px;
+        background-color: #4795bf !important;
+        border: 1px solid #4795bf !important;
+      }
+      .btn-copy {
+        background-color: #4795bf !important;
+        border: 1px solid #4795bf !important;
+        height: 38px;
+      }
+      textarea::before {
+        background: url("./bg-code.png");
+        opacity: 0.5;
+      }
+      .code {
+        position: relative;
+        padding: 0 !important;
+        margin: 10px 0;
+        flex: 1;
+      }
+      .code-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        opacity: 0.85;
+      }
+      #code {
+        color: white;
+        z-index: 2;
+        background-color: unset;
+        height: 100%;
+        max-height: 100%;
+        min-height: 100%;
+      }
+      .link {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .icon-copy {
+        font-size: 18;
+        color: white;
+      }
+      #link {
+        background-color: #fff !important;
+      }
+      .code-container {
+        display: flex;
+        flex-direction: column;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid root">
+      <div class="app-name">
+        <span class="text-app-name">&#60;&#62;Share code&#60;&#47;&#62;</span>
+      </div>
+      <div class="row main">
+        <div class="col-sm-2 col-xs-0"></div>
+        <div class="col-sm-8 col-xs-12">
+          <div class="form row">
+            <div class="col-sm-9 col-xs-12 code-container">
+              <div class="row link">
+                <label class="col-sm-4 col-xs-12">Your code:</label>
+                <div class="input-group col-sm-8 col-xs-12 link">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Your file link to share"
+                    id="link"
+                  />
+                  <div class="input-group-append">
+                    <button
+                      type="button"
+                      class="btn btn-default btn-copy"
+                      onclick="copy()"
+                    >
+                      <i class="fa fa-copy icon-copy"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-12 code">
+                <div class="code-bg"></div>
+                <textarea
+                  type="text"
+                  class="form-control col-sm-12"
+                  placeholder="// Paste your code in here"
+                  id="code"
+                ></textarea>
+              </div>
+            </div>
+            <div class="col-sm-3 col-xs-12">
+              <label class="col-sm-12">File name:</label>
+              <input type="text" class="form-control col-sm-12" id="name" />
+              <label class="col-sm-12">File type:</label>
+              <select class="form-control col-sm-12" id="type">
+                <option value="css">css</option>
+                <option value="js">js</option>
+              </select>
+              <button
+                onclick="getLink()"
+                class="btn btn-primary col-sm-12 btn-share"
+              >
+                Share
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-2 col-xs-0"></div>
+      </div>
+    </div>
+    <script>
+      document.getElementById("link").disabled = true;
+      function getLink(e) {
+        let code = document.getElementById("code").value;
+        let name = document.getElementById("name").value;
+        let type = document.getElementById("type").value;
+        fetch("/get-link", {
+          method: "post",
+          body: JSON.stringify({
+            data: code,
+            name: name + "." + type,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((response) => {
+            console.log(response);
+            document.getElementById("link").value =
+              window.location.origin + "/" + response.data;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
+      function copy() {
+        var copyText = document.getElementById("link");
+        copyText.disabled = false;
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        copyText.disabled = true;
+      }
+    </script>
+  </body>
+</html>
